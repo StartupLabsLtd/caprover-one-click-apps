@@ -10,6 +10,8 @@ services:
             DISABLE_RSPAMD: $$cap_POSTE_DISABLE_RSPAMD
             DISABLE_ROUNDCUBE: $$cap_POSTE_DISABLE_ROUNDCUBE
             VIRTUAL_HOST: $$cap_POSTE_HOSTNAME
+            LISTEN_ON: "*"
+            SEND_ON: "*"
         ports:
             - '25:25'
             - '110:110'
