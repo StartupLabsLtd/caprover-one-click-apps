@@ -14,11 +14,12 @@ caproverOneClickApp:
           validRegex: /^([a-zA-Z0-9])+$/
         - id: $$cap_db_pass
           label: Database password
+          defaultValue: $$cap_gen_random_hex(32)
           description: ''
           validRegex: /.{1,}/
         - id: $$cap_odoo_version
           label: Odoo Version
-          defaultValue: '18.0'
+          defaultValue: '19.0'
           description: Check out their Docker page for the valid tags https://hub.docker.com/r/library/odoo/tags/
           validRegex: /^([^\s^\/])+$/
         - id: $$cap_database_version
