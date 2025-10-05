@@ -39,7 +39,7 @@ services:
         volumes:
             - $$cap_appname-db-data:/var/lib/postgresql/data
 
-    $$cap_appname-odoo:
+    $$cap_appname:
         depends_on:
             - $$cap_appname-db
         image: odoo:$$cap_odoo_version
@@ -53,4 +53,4 @@ services:
         caproverExtra:
             containerHttpPort: '8069'
         volumes:
-            - $$cap_appname-odoo-data:/var/lib/odoo
+            - $$cap_appname-data:/var/lib/odoo
