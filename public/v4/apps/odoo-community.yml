@@ -55,3 +55,5 @@ services:
             containerHttpPort: '8069'
         volumes:
             - $$cap_appname-data:/var/lib/odoo
+            - $$cap_appname-addons:/mnt/extra-addons
+            - $$cap_appname-config:/etc/odoo
