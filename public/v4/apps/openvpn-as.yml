@@ -10,6 +10,8 @@ services:
             PGID: $$cap_OPENVPN_GUID
             TZ: $$cap_OPENVPN_TZ
             INTERFACE: $$cap_OPENVPN_INTERFACE
+            OPENVPN_ADMIN_USER: $$cap_OPENVPN_ADMIN_USER
+            OPENVPN_ADMIN_PASS: $$cap_OPENVPN_ADMIN_PASS
         volumes:
             - $$cap_appname:/config
         ports:
@@ -17,6 +19,20 @@ services:
             - $$cap_OPENVPN_PORT_UDP:$$cap_OPENVPN_PORT_UDP
         cap_add:
             - NET_ADMIN
+
+        command:
+            - bash
+            - -lc
+            - |
+                if [ -n "$OPENVPN_ADMIN_PASS" ]; then
+                  echo "Setting OpenVPN-AS admin password for user ${OPENVPN_ADMIN_USER:-openvpn}"
+                  /usr/local/openvpn_as/scripts/sacli \
+                    --user "${OPENVPN_ADMIN_USER:-openvpn}" \
+                    --new_pass "$OPENVPN_ADMIN_PASS" \
+                    SetLocalPassword || true
+                fi
+
+                exec /usr/local/openvpn_as/scripts/openvpnas --nodaemon
 
 caproverOneClickApp:
     displayName: OpenVPN Access Server (Working)
@@ -43,25 +59,36 @@ caproverOneClickApp:
             3. **Edit Default Nginx Configurations** and search for the line `set $upstream http://<%-s.localDomain%>:<%-s.containerHttpPort%>;` and replace `http://` with `https://`
             4. Go to **App Configs** and paste the following snippet into **Service Update Override**: `{ "TaskTemplate": { "ContainerSpec": { "CapabilityAdd": ["CAP_NET_ADMIN"], "Hostname": "$$cap_appname.$$cap_root_domain" } } }`
             5. **Save & Update** and wait a minute
-            6. Go to https://$$cap_appname.$$cap_root_domain/admin and log in using user `admin` and password `password`
-            7. Navigate to **Configuration** > **Network Settings** and replace the value in **Hostname Or IP Address** with `$$cap_appname.$$cap_root_domain` and update the server (if you get an error just refresh the page, log back in to the admin page (`/admin`) and proceed with the next step)
-            8. Navigate to **User Management** > **User Permissions** and add **New Username**, set a password, make it an admin and **Save Settings**.
-            9. Log out and log in as the new user
-            10. Navigate to **User Management** > **User Permissions** and delete the `admin` account
-            11. Access via SSH to your server and execute `docker exec -it $(docker ps --filter name=srv-captain--$$cap_appname -q) sed -i '/boot_pam_users.0=admin/c\boot_pam_users.0=abcnonexistentuserxyz' /config/etc/as.conf` to block the `admin` account and prevent its creation during container restart
+            6. Access via SSH to your server and execute `docker exec -it $(docker ps --filter name=srv-captain--vpn -q) bash -lc 'sacli --user "openvpn" --new_pass "MyNewPassword" SetLocalPassword && sacli start'` to set your admin password
+            7. Go to https://$$cap_appname.$$cap_root_domain/admin and log in using user `admin` and password `password`
+            8. Navigate to **Configuration** > **Network Settings** and replace the value in **Hostname Or IP Address** with `$$cap_appname.$$cap_root_domain` and update the server (if you get an error just refresh the page, log back in to the admin page (`/admin`) and proceed with the next step)
+            9. Navigate to **User Management** > **User Permissions** and add **New Username**, set a password, make it an admin and **Save Settings**.
+            10. Log out and log in as the new user
+            11. Navigate to **User Management** > **User Permissions** and delete the `admin` account
+            12. Access via SSH to your server and execute `docker exec -it $(docker ps --filter name=srv-captain--$$cap_appname -q) sed -i '/boot_pam_users.0=admin/c\boot_pam_users.0=abcnonexistentuserxyz' /config/etc/as.conf` to block the `admin` account and prevent its creation during container restart
 
             Enjoy your private VPN!
     variables:
         - id: $$cap_OPENVPN_VERSION
           label: General | Version Tag
           description: Check out their valid tags at https://hub.docker.com/r/openvpn/openvpn-as/tags
-          defaultValue: 2.14.3-5936bcd7-Ubuntu24
+          defaultValue: 3.0.2-87c70987-Ubuntu24
           validRegex: /.{1,}/
         - id: $$cap_OPENVPN_TZ
           label: General | Timezone
           description: Timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-          defaultValue: UTC
+          defaultValue: America/Toronto
           validRegex: /.{1,}/
+        - id: $$cap_OPENVPN_ADMIN_USER
+          label: Security | Admin username
+          description: OpenVPN-AS web admin user. Usually "openvpn".
+          defaultValue: openvpn
+          validRegex: /.{1,}/
+        - id: $$cap_OPENVPN_ADMIN_PASS
+          label: Security | Admin password
+          description: Password for the admin user. Keep this secret.
+          defaultValue: $$cap_gen_random_hex(32)
+          validRegex: /.{6,}/
         - id: $$cap_OPENVPN_PUID
           label: General | User ID
           description: User ID that the process uses, run `id $user` on your instance to see the ID.
@@ -92,3 +119,4 @@ caproverOneClickApp:
           description: >-
               With bridge networking, leave it blank (or enter `eth0`).
               If `host` or `macvlan`, set it to your host's network interface, found by running `ifconfig`.
+          defaultValue: eth0
