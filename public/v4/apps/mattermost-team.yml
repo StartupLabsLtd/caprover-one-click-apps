@@ -35,12 +35,12 @@ services:
 caproverOneClickApp:
     variables:
         - id: $$cap_mattermost_version
-          label: mattermost Docker Image tag. Use 'release-9.7' for example.
+          label: mattermost Docker Image tag. Use 'release-11' for example.
           defaultValue: release-11
           description: Check out their Docker page for the valid tags https://hub.docker.com/r/mattermost/mattermost-team-edition/tags
         - id: $$cap_postgres_version
-          label: postgres database Docker Image tag. Use '14.3' for example.
-          defaultValue: 18.0
+          label: postgres database Docker Image tag. Use '17' for example.
+          defaultValue: 17
           description: Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags
         - id: $$cap_pg_pass
           label: Database Password
