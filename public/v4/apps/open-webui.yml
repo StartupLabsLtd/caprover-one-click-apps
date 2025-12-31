@@ -10,6 +10,7 @@ services:
             ENABLE_ADMIN_CHAT_ACCESS: false
             CHAT_STREAM_RESPONSE_CHUNK_MAX_BUFFER_SIZE: $$cap_chat_stream_response_chunk_max_buffer_size
             ENABLE_CHAT_RESPONSE_BASE64_IMAGE_URL_CONVERSION: $$cap_replace_image_urls_in_chat_response
+            GLOBAL_LOG_LEVEL: $$cap_global_log_level
         volumes:
             - $$cap_appname-data:/app/backend/data
         caproverExtra:
@@ -52,6 +53,11 @@ caproverOneClickApp:
           label: Enable Image URL Conversion
           description: Automatically extracts large Base64 image data from the chat response and saves it as a local file. This keeps the chat database small and prevents the UI from lagging during high-resolution image rendering.
           defaultValue: true
+
+        - id: $$cap_global_log_level
+          label: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+          description: Log level
+          defaultValue: INFO
 
     instructions:
         start: >-
