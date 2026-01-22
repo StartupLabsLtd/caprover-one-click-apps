@@ -4,6 +4,7 @@ caproverOneClickApp:
         start: |-
             Deploying Solidus: A free, open-source e-commerce platform built with Ruby on Rails.
             Solidus gives you complete control over your store with a flexible, modular architecture.
+
             **Included Components:**
             - Solidus e-commerce platform
             - SQLite database (built-in, no external database needed)
@@ -14,6 +15,11 @@ caproverOneClickApp:
             **Access Your Store:**
             - Storefront: https://$$cap_appname.$$cap_root_domain
             - Admin Panel: https://$$cap_appname.$$cap_root_domain/admin
+
+            **Default Admin Credentials:**
+            - Email: $$cap_admin_email
+            - Password: $$cap_admin_password
+
             See https://guides.solidus.io/ for documentation and customization guides.
     displayName: Solidus (SQLite)
     isOfficial: false
@@ -23,27 +29,37 @@ caproverOneClickApp:
         - id: $$cap_solidus_image
           label: Solidus Image
           defaultValue: 'solidus-demo:latest'
-          description: Docker image name for Solidu
+          description: Docker image name for Solidus
           validRegex: /^.+$/
-        - id: $$cap_admin_email
-          label: Admin Email
-          defaultValue: admin@example.com
-          description: Email address for the admin user
-          validRegex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        - id: $$cap_admin_password
-          label: Admin Password
-          defaultValue: $$cap_gen_random_hex(12)
-          description: Password for the admin user (auto-generated)
-          validRegex: /.{8,}/
+        - id: $$cap_rails_env
+          label: Rails Environment
+          defaultValue: 'development'
+          description: Rails environment (development, production, test)
+          validRegex: /^(development|production|test)$/
         - id: $$cap_secret_key_base
           label: Secret Key Base
           defaultValue: $$cap_gen_random_hex(64)
-          description: Rails secret key base for encryption (auto-generated)
-          validRegex: /.{32,}/
-        - id: $$cap_load_sample_data
-          label: Load Sample Data
+          description: Rails secret key for encryption (auto-generated)
+          validRegex: /.{1,}/
+        - id: $$cap_admin_email
+          label: Admin Email
+          defaultValue: 'admin@example.com'
+          description: Email address for the initial admin user
+          validRegex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        - id: $$cap_admin_password
+          label: Admin Password
+          defaultValue: $$cap_gen_random_hex(16)
+          description: Password for the initial admin user (auto-generated)
+          validRegex: /.{8,}/
+        - id: $$cap_rails_log_level
+          label: Rails Log Level
+          defaultValue: 'info'
+          description: Rails logging level (debug, info, warn, error, fatal)
+          validRegex: /^(debug|info|warn|error|fatal)$/
+        - id: $$cap_rails_serve_static_files
+          label: Serve Static Files
           defaultValue: 'true'
-          description: Load sample products and data (true/false)
+          description: Whether Rails should serve static files (true/false)
           validRegex: /^(true|false)$/
 
 services:
@@ -51,13 +67,13 @@ services:
         image: $$cap_solidus_image
         restart: always
         environment:
-            RAILS_ENV: production
+            RAILS_ENV: $$cap_rails_env
+            RAILS_DEVELOPMENT_HOSTS: '.$$cap_root_domain,$$cap_appname.$$cap_root_domain'
+            SECRET_KEY_BASE: $$cap_secret_key_base
             ADMIN_EMAIL: $$cap_admin_email
             ADMIN_PASSWORD: $$cap_admin_password
-            SECRET_KEY_BASE: $$cap_secret_key_base
-            LOAD_SAMPLE_DATA: $$cap_load_sample_data
-            RAILS_LOG_TO_STDOUT: 'true'
-            RAILS_SERVE_STATIC_FILES: 'true'
+            RAILS_LOG_LEVEL: $$cap_rails_log_level
+            RAILS_SERVE_STATIC_FILES: $$cap_rails_serve_static_files
         caproverExtra:
             containerHttpPort: '3000'
             websocketSupport: 'true'
