@@ -3,23 +3,17 @@ caproverOneClickApp:
     instructions:
         start: |-
             Deploying Solidus: A free, open-source e-commerce platform built with Ruby on Rails.
-
             Solidus gives you complete control over your store with a flexible, modular architecture.
-
             **Included Components:**
             - Solidus e-commerce platform
             - SQLite database (built-in, no external database needed)
-
             **Note:** The database is automatically set up on first start. No configuration needed!
         end: |-
             Done! 🎉
-
             Your Solidus e-commerce store is now deployed and ready to use.
-
             **Access Your Store:**
             - Storefront: https://$$cap_appname.$$cap_root_domain
             - Admin Panel: https://$$cap_appname.$$cap_root_domain/admin
-
             See https://guides.solidus.io/ for documentation and customization guides.
     displayName: Solidus (SQLite)
     isOfficial: false
