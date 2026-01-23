@@ -10,7 +10,11 @@ services:
             ENABLE_ADMIN_CHAT_ACCESS: false
             CHAT_STREAM_RESPONSE_CHUNK_MAX_BUFFER_SIZE: $$cap_chat_stream_response_chunk_max_buffer_size
             ENABLE_CHAT_RESPONSE_BASE64_IMAGE_URL_CONVERSION: $$cap_replace_image_urls_in_chat_response
+            ENABLE_OPENAI_API: "true"
+            OPENAI_API_BASE_URLS: "http://srv-captain--$$cap_appname-pipelines:9099"
+            OPENAI_API_KEYS: $$cap_pipelines_api_key
             GLOBAL_LOG_LEVEL: $$cap_global_log_level
+            CORS_ALLOW_ORIGIN: $$cap_cors_allow_origin
         volumes:
             - $$cap_appname-data:/app/backend/data
         caproverExtra:
@@ -22,6 +26,17 @@ services:
             - $$cap_appname-api-data:/root/.ollama
         caproverExtra:
             notExposeAsWebApp: 'true'
+
+    $$cap_appname-pipelines:
+        image: ghcr.io/open-webui/pipelines:main
+        environment:
+            # This allows the container to talk to other services on the same CapRover network
+            PIPELINES_API_KEY: $$cap_pipelines_api_key
+        volumes:
+            - $$cap_appname-pipelines-data:/app/pipelines
+        caproverExtra:
+            notExposeAsWebApp: 'true'
+
 caproverOneClickApp:
     variables:
         - id: $$cap_webui_version
@@ -54,10 +69,20 @@ caproverOneClickApp:
           description: Automatically extracts large Base64 image data from the chat response and saves it as a local file. This keeps the chat database small and prevents the UI from lagging during high-resolution image rendering.
           defaultValue: true
 
+        - id: $$cap_pipelines_api_key
+          label: Pipelines API Key
+          description: Pipelines API Key
+          defaultValue: $$cap_gen_random_hex(24)
+
         - id: $$cap_global_log_level
           label: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
           description: Log level
           defaultValue: INFO
+
+        - id: $$cap_cors_allow_origin
+          label: Allowed origins for Cross-Origin
+          description: Sets the allowed origins for Cross-Origin Resource Sharing (CORS). Semicolon ';' separated list of allowed origins. e.g. "https://yourdomain.com;http://youripaddress;http://localhost:3000"
+          defaultValue: *
 
     instructions:
         start: >-
