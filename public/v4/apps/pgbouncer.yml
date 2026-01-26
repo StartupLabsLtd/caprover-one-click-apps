@@ -1,0 +1,97 @@
+captainVersion: 4
+caproverOneClickApp:
+    instructions:
+        start: |-
+            Deploying PGBouncer - a lightweight connection pooler for PostgreSQL.
+
+            PGBouncer reduces the overhead of establishing new connections to PostgreSQL by maintaining a pool of connections.
+        end: |-
+            Done!
+
+            Your PGBouncer is now deployed and ready to use.
+
+            **Connection Details:**
+            - Internal Host: srv-captain--$$cap_appname
+            - Port: 5432
+            - Database: $$cap_db_name
+            - User: $$cap_db_user
+            - Password: (use your PostgreSQL user password)
+
+            **Next Steps:**
+            1. Connect to PGBouncer from other CapRover apps using: srv-captain--$$cap_appname:5432
+            2. PGBouncer will pool connections to your PostgreSQL database at $$cap_db_host:$$cap_db_port
+            3. All connections go through PGBouncer, reducing connection overhead
+
+            See https://www.pgbouncer.org/ for more details and configuration options.
+    displayName: PGBouncer
+    isOfficial: false
+    description: Lightweight connection pooler for PostgreSQL. Reduces connection overhead and improves database performance.
+
+    variables:
+        - id: $$cap_pgb_version
+          label: PGBouncer Version
+          defaultValue: 'v1.25.1-p0'
+          description: PGBouncer image tag from edoburu/pgbouncer (check Docker Hub for valid tags)
+          validRegex: /^([^\s^\/])+$/
+        - id: $$cap_db_host
+          label: PostgreSQL Host
+          description: Your PostgreSQL database host (e.g., db.example.com, IP address, or srv-captain--appname for CapRover apps)
+          validRegex: /.{1,}/
+        - id: $$cap_db_port
+          label: PostgreSQL Port
+          defaultValue: '5432'
+          description: PostgreSQL database port (usually 5432)
+          validRegex: /^[0-9]+$/
+        - id: $$cap_db_name
+          label: Database Name
+          defaultValue: postgres
+          description: PostgreSQL database name to connect to
+          validRegex: /^([a-zA-Z0-9_])+$/
+        - id: $$cap_db_user
+          label: Database User
+          defaultValue: postgres
+          description: PostgreSQL database username
+          validRegex: /^([a-zA-Z0-9_])+$/
+        - id: $$cap_db_password
+          label: Database Password
+          description: Password for the PostgreSQL database user
+          validRegex: /.{1,}/
+        - id: $$cap_auth_type
+          label: Authentication Type
+          defaultValue: plain
+          description: 'Authentication method for PGBouncer client connections. Choose from: any (try all methods), trust (no password), plain (plain text password), md5 (MD5 hash), cert (SSL certificate), hba (use PostgreSQL PGBouncer.conf), ldap (LDAP), pam (PAM). Default is plain which works with most PostgreSQL setups.'
+          validRegex: /^(any|trust|plain|md5|cert|hba|ldap|pam)$/
+        - id: $$cap_pool_mode
+          label: Pool Mode
+          defaultValue: transaction
+          description: Connection pooling mode (session, transaction, or statement)
+          validRegex: /^(session|transaction|statement)$/
+        - id: $$cap_max_client_conn
+          label: Max Client Connections
+          defaultValue: '100'
+          description: Maximum number of client connections allowed
+          validRegex: /^[0-9]+$/
+        - id: $$cap_default_pool_size
+          label: Default Pool Size
+          defaultValue: '20'
+          description: Default number of server connections per user/database pair
+          validRegex: /^[0-9]+$/
+
+services:
+    $$cap_appname:
+        image: edoburu/pgbouncer:$$cap_pgb_version
+        restart: always
+        environment:
+            DB_HOST: $$cap_db_host
+            DB_PORT: $$cap_db_port
+            DB_USER: $$cap_db_user
+            DB_PASSWORD: $$cap_db_password
+            DB_NAME: $$cap_db_name
+            AUTH_TYPE: $$cap_auth_type
+            POOL_MODE: $$cap_pool_mode
+            MAX_CLIENT_CONN: $$cap_max_client_conn
+            DEFAULT_POOL_SIZE: $$cap_default_pool_size
+        caproverExtra:
+            notExposeAsWebApp: 'true'
+        volumes:
+            - $$cap_appname-data:/etc/pgbouncer
