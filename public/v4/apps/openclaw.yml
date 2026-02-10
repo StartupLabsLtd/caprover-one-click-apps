@@ -1,0 +1,45 @@
+captainVersion: 4
+caproverOneClickApp:
+    instructions:
+        start: |-
+            Deploying OpenClaw (FourPlayers) for **CometAPI**.
+            This version skips the Nginx 'browser' error and forces Gemini 3 Flash.
+        end: |-
+            OpenClaw is ready! 🚀
+
+            **Dashboard URL:** https://$$cap_appname.$$cap_root_domain/?token=$$cap_openclaw_token
+    displayName: OpenClaw (CometAPI + Gemini)
+    isOfficial: false
+    description: Stable AI agent runtime. Fixed for OpenAI-compatible providers and Gemini model mapping.
+    variables:
+        - id: $$cap_openclaw_token
+          label: Gateway Token
+          defaultValue: 21baa96407eee45ece25258f
+        - id: $$cap_comet_key
+          label: CometAPI Key
+          defaultValue: ''
+        - id: $$cap_comet_base_url
+          label: CometAPI Base URL
+          defaultValue: 'https://api.cometapi.com/v1'
+        - id: $$cap_model_id
+          label: Model ID
+          defaultValue: 'gemini-3-flash'
+
+services:
+    $$cap_appname:
+        image: fourplayers/openclaw:latest
+        restart: always
+        # This overrides the internal Claude default by rewriting the config at boot
+        entrypoint: >
+          /bin/sh -c "mkdir -p /data/.openclaw && 
+          echo '{\"gateway\":{\"auth\":{\"token\":\"$$cap_openclaw_token\"}},\"agents\":{\"defaults\":{\"model\":{\"primary\":\"$$cap_model_id\"}}},\"providers\":{\"openai\":{\"enabled\":true,\"apiKey\":\"$$cap_comet_key\",\"baseUrl\":\"$$cap_comet_base_url\"}}}' > /data/.openclaw/openclaw.json && 
+          openclaw gateway --host 0.0.0.0"
+        environment:
+            OPENCLAW_GATEWAY_TOKEN: $$cap_openclaw_token
+            OPENAI_API_KEY: $$cap_comet_key
+            OPENAI_BASE_URL: $$cap_comet_base_url
+            OPENAI_MODEL: $$cap_model_id
+        caproverExtra:
+            containerHttpPort: '18789'
+        volumes:
+            - $$cap_appname-data:/data
