@@ -27,6 +27,7 @@ services:
         caproverExtra:
             notExposeAsWebApp: 'true'
 
+    # Pipelines
     $$cap_appname-pipelines:
         image: ghcr.io/open-webui/pipelines:main
         environment:
@@ -34,6 +35,18 @@ services:
             PIPELINES_API_KEY: $$cap_pipelines_api_key
         volumes:
             - $$cap_appname-pipelines-data:/app/pipelines
+        caproverExtra:
+            notExposeAsWebApp: 'true'
+
+    # Open Terminal
+    $$cap_appname-terminal:
+        image: ghcr.io/open-webui/open-terminal:$$cap_open_terminal_version
+        environment:
+            OPEN_TERMINAL_API_KEY: $$cap_open_terminal_api_key
+            OPEN_TERMINAL_PACKAGES: $$cap_open_terminal_packages
+            OPEN_TERMINAL_PIP_PACKAGES: $$cap_open_terminal_pip_packages
+        volumes:
+            - $$cap_appname-terminal-data:/home/user
         caproverExtra:
             notExposeAsWebApp: 'true'
 
@@ -48,6 +61,11 @@ caproverOneClickApp:
           label: Ollama Version
           defaultValue: '0.13.3'
           description: Checkout their docker page for the valid tags https://hub.docker.com/r/ollama/ollama/tags
+
+        - id: $$cap_open_terminal_version
+          label: Open Terminal Version
+          defaultValue: 'main'
+          description: Checkout their docker page for the valid tags https://github.com/open-webui/open-terminal/pkgs/container/open-terminal
 
         - id: $$cap_app_key
           label: Secret Key
@@ -84,12 +102,33 @@ caproverOneClickApp:
           description: Sets the allowed origins for Cross-Origin Resource Sharing (CORS). Semicolon ';' separated list of allowed origins. e.g. "https://yourdomain.com;http://youripaddress;http://localhost:3000"
           defaultValue: *
 
+        - id: $$cap_open_terminal_api_key
+          label: Open Terminal API Key
+          description: API Key for the Open Terminal service.
+          defaultValue: $$cap_gen_random_hex(24)
+
+        - id: $$cap_open_terminal_packages
+          label: Open Terminal Apt Packages
+          description: Space-separated list of apt packages to install at startup (e.g., "cowsay figlet").
+          defaultValue: ''
+
+        - id: $$cap_open_terminal_pip_packages
+          label: Open Terminal Pip Packages
+          description: Space-separated list of pip packages to install at startup (e.g., "httpx polars").
+          defaultValue: ''
+
     instructions:
         start: >-
             ChatGPT-Style Web Interface for Ollama 🦙
         end: >-
             Aaaand you're done! 😄
             Your service is available at http://$$cap_appname.$$cap_root_domain
+
+            To finish the Open Terminal setup:
+            1. Log in to Open WebUI.
+            2. Go to Admin Settings -> Integrations -> Open Terminal.
+        3. Set the Terminal URL to: http://srv-captain--$$cap_appname-terminal:8000
+            4. Set the API Key to the one you generated during installation.
     displayName: 'Open-webui'
     isOfficial: true
     baseUrl: https://github.com/open-webui/open-webui
