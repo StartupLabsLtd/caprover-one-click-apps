@@ -25,7 +25,7 @@ services:
             notExposeAsWebApp: 'true'
         image: postgres:$$cap_POSTGRES_VERSION
         volumes:
-            - $$cap_appname-db:/var/lib/postgresql
+            - $$cap_appname-db:/var/lib/postgresql/data
         environment:
             POSTGRES_USER: $$cap_POSTGRES_USER
             POSTGRES_PASSWORD: $$cap_POSTGRES_PASSWORD
@@ -52,12 +52,12 @@ caproverOneClickApp:
         - id: $$cap_PLANKA_VERSION
           label: General | Planka Version
           description: Check out their valid tags at https://github.com/orgs/plankanban/packages/container/package/planka
-          defaultValue: 'v2.1.0'
+          defaultValue: '2.1.1'
           validRegex: /.{1,}/
         - id: $$cap_POSTGRES_VERSION
           label: General | PostgreSQL Version
           description: Check out their valid tags at https://hub.docker.com/r/btcpayserver/postgres/tags
-          defaultValue: '18.1'
+          defaultValue: '13.23'
           validRegex: /.{1,}/
         - id: $$cap_PLANKA_PORT
           label: Application | Port
