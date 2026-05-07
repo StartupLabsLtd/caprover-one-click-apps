@@ -10,8 +10,8 @@ services:
             ENABLE_ADMIN_CHAT_ACCESS: false
             CHAT_STREAM_RESPONSE_CHUNK_MAX_BUFFER_SIZE: $$cap_chat_stream_response_chunk_max_buffer_size
             ENABLE_CHAT_RESPONSE_BASE64_IMAGE_URL_CONVERSION: $$cap_replace_image_urls_in_chat_response
-            ENABLE_OPENAI_API: "true"
-            OPENAI_API_BASE_URLS: "http://srv-captain--$$cap_appname-pipelines:9099"
+            ENABLE_OPENAI_API: 'true'
+            OPENAI_API_BASE_URLS: 'http://srv-captain--$$cap_appname-pipelines:9099'
             OPENAI_API_KEYS: $$cap_pipelines_api_key
             GLOBAL_LOG_LEVEL: $$cap_global_log_level
             CORS_ALLOW_ORIGIN: $$cap_cors_allow_origin
@@ -100,7 +100,7 @@ caproverOneClickApp:
         - id: $$cap_cors_allow_origin
           label: Allowed origins for Cross-Origin
           description: Sets the allowed origins for Cross-Origin Resource Sharing (CORS). Semicolon ';' separated list of allowed origins. e.g. "https://yourdomain.com;http://youripaddress;http://localhost:3000"
-          defaultValue: *
+          defaultValue: '*'
 
         - id: $$cap_open_terminal_api_key
           label: Open Terminal API Key
@@ -127,7 +127,8 @@ caproverOneClickApp:
             To finish the Open Terminal setup:
             1. Log in to Open WebUI.
             2. Go to Admin Settings -> Integrations -> Open Terminal.
-        3. Set the Terminal URL to: http://srv-captain--$$cap_appname-terminal:8000
+        3. Set the Terminal URL to:
+            http://srv-captain--$$cap_appname-terminal:8000
             4. Set the API Key to the one you generated during installation.
     displayName: 'Open-webui'
     isOfficial: true
